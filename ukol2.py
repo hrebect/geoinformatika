@@ -1,4 +1,4 @@
-import json, sys, math
+import json, sys, math, statistics
 from pyproj import CRS, Transformer
 
 
@@ -25,43 +25,53 @@ def verejne_kont(kontejnery_data):#vyber souradnic  verejnych kontejneru
 
 def vzdalenosti(adresy_data, kontejnery):
     adresy_features = adresy_data["features"] 
-    max_minimum = 0
+    
+    list_minim = [] #list pro median
+    max_minimum = 0 #vzdalenost nemuze byt zaporna, spodni hranice maximalního minima
+    
     for buliding in adresy_features:  #projede vsechny budovy 
         properties = buliding["properties"]
         geometry = buliding["geometry"]
         coordinates = (geometry['coordinates'])
         address = str(properties["addr:street"] + ' ' + properties["addr:housenumber"])
         y,x = wgs2jtsk.transform(coordinates[1],coordinates[0]) #prevod souradnic
-        coord_jtsk = [y,x] #ulozeni souradnic jako list, aby byly stejný typ jako souradnice kontejneru
-        minimum = 10000
+        coord_build = [y,x] #ulozeni souradnic jako list, aby byly stejný typ jako souradnice kontejneru
+        minimum = 10000 #horní hranice minima, podle zadani nepracujeme se vzdalenostmi nad 10 km
         
-        for souradnice in kontejnery: #vypocet vzdalenosti od kazdeho kontejneru
-            x_vzdalenost = coord_jtsk[1]-souradnice[1]
-            y_vzdalenost = coord_jtsk[0]-souradnice[0]
-            vzdalenost = math.sqrt(x_vzdalenost * x_vzdalenost + y_vzdalenost *y_vzdalenost)
-            if vzdalenost < minimum:
+        for coord_cont in kontejnery: #vypocet vzdalenosti od kazdeho kontejneru
+            x_vzdalenost = coord_build[1]-coord_cont[1]
+            y_vzdalenost = coord_build[0]-coord_cont[0]
+            vzdalenost = math.sqrt(x_vzdalenost * x_vzdalenost + y_vzdalenost *y_vzdalenost) #phytagoras
+            if vzdalenost < minimum: #hledani minima pro adresu v ramci kontejneru
                 minimum = vzdalenost
+        list_minim.append(minimum) #list vsech minim
         if minimum > 10000: #ukoncveni programu, kdyz je u jednoho konejnery minimum vice nez 10 km
             sys.exit('CHYBA, u jedné adresy je nejbližší kontejner vzdálen více než 10 km')  
-        if minimum > max_minimum:
+        
+        if minimum > max_minimum: #hledání maximalního minima v ramci vsech adres
             max_minimum = minimum
             max_address = address
-    print(f'Nejdále ke kontejneru je z adresy {max_address} a to {int(round(max_minimum,0))} m.') 
-    
-    #print(coord_jtsk)
+        
+    #vypocte prumeru
+    prumer = statistics.mean(list_minim)
+    #vystupy
+    print(f'Načteno {len(adresy_features)} adresních bodů')
+    print(f'Načteno {len(kontejnery)} kontejnerů\n')
+    print(f'Pruměrná vzdálenost ke kontejneru je {int(round(prumer,0))} m.')
+    print(f'Nejdále ke kontejneru je z adresy {max_address} a to {int(round(max_minimum,0))} m.')
+    print(f'Medián vzdáleností je {int(round(statistics.median(list_minim)))} m.') #vypocet medianu a jeho zobrazeni
 
 #nacteni souboru
 try:
     with open('adresy.geojson',encoding='utf-8') as f:
         adresy_data = json.load(f)
-except FileNotFoundError:
+except FileNotFoundError: #ukonceni programu, kdyz soubor nebude nalezen
     sys.exit('Soubor s adresami nenalezen')
 try:
     with open('kontejnery.geojson',encoding='utf-8') as e:   
         kontejnery_data = json.load(e)
-except FileNotFoundError:
+except FileNotFoundError: #ukonceni programu, kdyz soubor nebude nalezen
     sys.exit('Soubor s kontejnery nenalezen')
 
 kontejnery = verejne_kont(kontejnery_data)
-
-print(vzdalenosti(adresy_data,kontejnery))
+vzdalenosti(adresy_data,kontejnery)
