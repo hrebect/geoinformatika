@@ -1,17 +1,11 @@
 import json, sys
 from pyproj import CRS, Transformer
 
-#funkce na prevod souradnic z wgs do jtsk
-#vstup je list 
-def prevod(souradnice):
-    crs_wgs = CRS.from_epsg(4326)
-    crs_jtsk = CRS.from_epsg(5514)
-    wgs2jtsk= Transformer.from_crs(crs_wgs,crs_jtsk)
-    y = souradnice[1]
-    x = souradnice[0]
-    return wgs2jtsk.transform(y,x)
 
-
+#priprava prevodu mezi wgs a jtsk
+crs_wgs = CRS.from_epsg(4326)
+crs_jtsk = CRS.from_epsg(5514)
+wgs2jtsk= Transformer.from_crs(crs_wgs,crs_jtsk)
 
 #nacteni souboru
 try:
@@ -33,7 +27,7 @@ for buliding in adresy_features:  #projede vsechny budovy
     geometry = buliding["geometry"]
     coordinates = (geometry['coordinates'])
     address = str(properties["addr:street"] + ' ' + properties["addr:housenumber"])
-    y,x = prevod(coordinates)
-    coord_jtsk = [y, x] #ulozeni souradnic jako list, aby byly stejný typ jako souradnice kontejneru
-
+    y,x = wgs2jtsk.transform(coordinates[1],coordinates[0])
+    coord_jtsk = [y,x] #ulozeni souradnic jako list, aby byly stejný typ jako souradnice kontejneru
+    print(coord_jtsk)
 
