@@ -44,7 +44,7 @@ def vzdalenosti(adresy_jmena, adresy_coord, kontejnery):
     list_minim = [] #list pro median
         
     for build_coord in adresy_coord:
-        minimum = 300 #horní hranice minima, podle zadani nepracujeme se vzdalenostmi nad 10 km
+        minimum = 10001 #horní hranice minima, podle zadani nepracujeme se vzdalenostmi nad 10 km
         for cont_coord in kontejnery: #vypocet vzdalenosti od kazdeho kontejneru
             x_vzdalenost = build_coord[1]-cont_coord[1]
             y_vzdalenost = build_coord[0]-cont_coord[0]
@@ -52,22 +52,26 @@ def vzdalenosti(adresy_jmena, adresy_coord, kontejnery):
             if vzdalenost < minimum: #hledani minima pro adresu v ramci kontejneru
                 minimum = vzdalenost
             
-        if minimum > 300: #ukoncveni programu, kdyz je u jednoho konejnery minimum vice nez 10 km
+        if minimum > 10000: #ukoncveni programu, kdyz je u jednoho konejnery minimum vice nez 10 km
             sys.exit('CHYBA, u jedné adresy je nejbližší kontejner vzdálen více než 10 km')  
         list_minim.append(minimum) #list vsech minim
             
-    return(list_minim)
+    return list_minim
 
 
-def vystup(list_minim, adresy_jmena):        
-    #vypocte prumeru
+def vystup(list_minim, adresy_jmena, kontejnery):        
+    #vypocte statistickych udaju
     prumer = statistics.mean(list_minim)
-    #vystupy
-    print(f'Načteno {len(adresy_features)} adresních bodů')
+    median = statistics.median(list_minim)
+    max_minimum = max(list_minim) 
+    max_pos = list_minim.index(max(list_minim))
+    max_adresa = adresy_jmena[max_pos]
+
+    print(f'Načteno {len(adresy_jmena)} adresních bodů')
     print(f'Načteno {len(kontejnery)} kontejnerů\n')
     print(f'Pruměrná vzdálenost ke kontejneru je {int(round(prumer,0))} m.')
-    print(f'Nejdále ke kontejneru je z adresy {max_address} a to {int(round(max_minimum,0))} m.')
-    print(f'Medián vzdáleností je {int(round(statistics.median(list_minim)))} m.') #vypocet medianu a jeho zobrazeni
+    print(f'Nejdále ke kontejneru je z adresy {max_adresa} a to {int(round(max_minimum,0))} m.')
+    print(f'Medián vzdáleností je {int(round(median,0))} m.') #vypocet medianu a jeho zobrazeni
 
 #nacteni souboru
 try:
@@ -81,11 +85,8 @@ try:
 except FileNotFoundError: #ukonceni programu, kdyz soubor nebude nalezen
     sys.exit('Soubor s kontejnery nenalezen')
 
+#spusteni fumkci a ulozeni do promennych
 kontejnery=verejne_kont(kontejnery_data)
 adresy_jmena,adresy_coord=adresy(adresy_data)
-
-
-
-print(len(vzdalenosti(adresy_jmena, adresy_coord, kontejnery)))
-print(len(adresy_jmena))
-print(max(vzdalenosti(adresy_jmena, adresy_coord, kontejnery)))
+list_minim = vzdalenosti(adresy_jmena, adresy_coord, kontejnery)
+vystup(list_minim, adresy_jmena, kontejnery)
