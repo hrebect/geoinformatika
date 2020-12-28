@@ -55,23 +55,10 @@ def vzdalenosti(adresy_jmena, adresy_coord, kontejnery):
         if minimum > 10000: #ukoncveni programu, kdyz je u jednoho konejnery minimum vice nez 10 km
             sys.exit('CHYBA, u jedné adresy je nejbližší kontejner vzdálen více než 10 km')  
         list_minim.append(minimum) #list vsech minim
-            
-    return list_minim
-
-
-def vystup(list_minim, adresy_jmena, kontejnery):        
-    #vypocte statistickych udaju
-    prumer = statistics.mean(list_minim)
-    median = statistics.median(list_minim)
-    max_minimum = max(list_minim) 
-    max_pos = list_minim.index(max(list_minim))
-    max_adresa = adresy_jmena[max_pos]
-
-    print(f'Načteno {len(adresy_jmena)} adresních bodů')
-    print(f'Načteno {len(kontejnery)} kontejnerů\n')
-    print(f'Pruměrná vzdálenost ke kontejneru je {int(round(prumer,0))} m.')
-    print(f'Nejdále ke kontejneru je z adresy {max_adresa} a to {int(round(max_minimum,0))} m.')
-    print(f'Medián vzdáleností je {int(round(median,0))} m.') #vypocet medianu a jeho zobrazeni
+        max_minimum = max(list_minim) 
+        max_pos = list_minim.index(max(list_minim))
+        max_adresa = adresy_jmena[max_pos]
+    return list_minim, max_minimum, max_adresa
 
 #nacteni souboru
 try:
@@ -79,14 +66,26 @@ try:
         adresy_data = json.load(f)
 except FileNotFoundError: #ukonceni programu, kdyz soubor nebude nalezen
     sys.exit('Soubor s adresami nenalezen')
+except PermissionError:
+    sys.exit('Program nemá oprávnění číst soubor s adresami')
 try:
     with open('kontejnery.geojson',encoding='utf-8') as e:   
         kontejnery_data = json.load(e)
 except FileNotFoundError: #ukonceni programu, kdyz soubor nebude nalezen
     sys.exit('Soubor s kontejnery nenalezen')
+except PermissionError:
+    sys.exit('Program nemá oprávnění číst soubor s kontejnery')
 
 #spusteni fumkci a ulozeni do promennych
 kontejnery=verejne_kont(kontejnery_data)
-adresy_jmena,adresy_coord=adresy(adresy_data)
-list_minim = vzdalenosti(adresy_jmena, adresy_coord, kontejnery)
-vystup(list_minim, adresy_jmena, kontejnery)
+adresy_jmena, adresy_coord=adresy(adresy_data)
+list_minim, max_minimum, max_adresa = vzdalenosti(adresy_jmena, adresy_coord, kontejnery)
+
+prumer = statistics.mean(list_minim)
+median = statistics.median(list_minim)
+
+print(f'Načteno {len(adresy_jmena)} adresních bodů')
+print(f'Načteno {len(kontejnery)} kontejnerů\n')
+print(f'Pruměrná vzdálenost ke kontejneru je {prumer:.0f} m.')
+print(f'Nejdále ke kontejneru je z adresy {max_adresa} a to {max_minimum:.0f} m.')
+print(f'Medián vzdáleností je {median:.0f} m.') 
