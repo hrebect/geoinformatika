@@ -11,14 +11,14 @@ wgs2jtsk= Transformer.from_crs(crs_wgs,crs_jtsk)
 
 def verejne_kont(kontejnery_data):#vyber souradnic  verejnych kontejneru
     kontejnery = []
-    conteiner_features = kontejnery_data["features"]
+    container_features = kontejnery_data["features"]
 
-    for conteiner in conteiner_features: #projde vsechny kontejnery
-        properties = conteiner["properties"]
+    for container in container_features: #projde vsechny kontejnery
+        properties = container["properties"]
         pristup = properties["PRISTUP"]
      
         if pristup == 'volně': #souradnice volnych kontejneru ulozi do listu 'kontejnery'
-            geometry = conteiner["geometry"]
+            geometry = container["geometry"]
             coordinates = (geometry['coordinates'])
             kontejnery.append(coordinates)
     return kontejnery
