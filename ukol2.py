@@ -18,8 +18,8 @@ def verejne_kont(kontejnery_data):#vyber souradnic  verejnych kontejneru
         pristup = properties["PRISTUP"]
      
         if pristup == 'volně': #souradnice volnych kontejneru ulozi do listu 'kontejnery'
-            geometry = container["geometry"]
-            coordinates = (geometry['coordinates'])
+            #geometry = container["geometry"]
+            coordinates = container["geometry"]['coordinates']
             kontejnery.append(coordinates)
     return kontejnery
 
@@ -31,8 +31,7 @@ def vzdalenosti(adresy_data, kontejnery):
     
     for buliding in adresy_features:  #projede vsechny budovy 
         properties = buliding["properties"]
-        geometry = buliding["geometry"]
-        coordinates = (geometry['coordinates'])
+        coordinates = buliding["geometry"]['coordinates']
         address = str(properties["addr:street"] + ' ' + properties["addr:housenumber"])
         y,x = wgs2jtsk.transform(coordinates[1],coordinates[0]) #prevod souradnic
         coord_build = [y,x] #ulozeni souradnic jako list, aby byly stejný typ jako souradnice kontejneru
