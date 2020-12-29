@@ -1,4 +1,4 @@
-## Dokumentace k programu
+## Vzdálenost ke kontejnerům na tříděný odpad
 Program má za úkol ze souborů adres a kontejnerů ve formátu GeoJSON vypočítat maximální a průměrnou vzdálenost k nejbližšímu veřejnému kontejneru z adres.
 ### Vlastnosti programu
 Program načte 2 soubory, jeden nese informace o kontejnerech a druhý o adresách. Když je jeden nebo oba soubory nedostupný, program se ukončí. S chybami uvnitř souborů program nepočítá, a když nějaké naskytnou, spadne.
