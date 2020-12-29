@@ -18,7 +18,6 @@ def verejne_kont(kontejnery_data):#vyber souradnic  verejnych kontejneru
         pristup = properties["PRISTUP"]
      
         if pristup == 'volně': #souradnice volnych kontejneru ulozi do listu 'kontejnery'
-            #geometry = container["geometry"]
             coordinates = container["geometry"]['coordinates']
             kontejnery.append(coordinates)
     return kontejnery
@@ -41,7 +40,7 @@ def adresy(adresy_data):
 
 
 def vzdalenosti(adresy_jmena, adresy_coord, kontejnery):
-    list_minim = [] #list pro median
+    list_minim = [] #list minim
         
     for build_coord in adresy_coord:
         minimum = 10001 #horní hranice minima, podle zadani nepracujeme se vzdalenostmi nad 10 km
@@ -52,7 +51,7 @@ def vzdalenosti(adresy_jmena, adresy_coord, kontejnery):
             if vzdalenost < minimum: #hledani minima pro adresu v ramci kontejneru
                 minimum = vzdalenost
             
-        if minimum > 10000: #ukoncveni programu, kdyz je u jednoho konejnery minimum vice nez 10 km
+        if minimum > 10000: #ukonceni programu, kdyz je u jednoho konejnery minimum vice nez 10 km
             sys.exit('CHYBA, u jedné adresy je nejbližší kontejner vzdálen více než 10 km')  
         list_minim.append(minimum) #list vsech minim
         max_minimum = max(list_minim) 
@@ -68,6 +67,7 @@ except FileNotFoundError: #ukonceni programu, kdyz soubor nebude nalezen
     sys.exit('Soubor s adresami nenalezen')
 except PermissionError:
     sys.exit('Program nemá oprávnění číst soubor s adresami')
+
 try:
     with open('kontejnery.geojson',encoding='utf-8') as e:   
         kontejnery_data = json.load(e)
@@ -76,7 +76,7 @@ except FileNotFoundError: #ukonceni programu, kdyz soubor nebude nalezen
 except PermissionError:
     sys.exit('Program nemá oprávnění číst soubor s kontejnery')
 
-#spusteni fumkci a ulozeni do promennych
+#spusteni funkci a ulozeni do promennych
 kontejnery=verejne_kont(kontejnery_data)
 adresy_jmena, adresy_coord=adresy(adresy_data)
 list_minim, max_minimum, max_adresa = vzdalenosti(adresy_jmena, adresy_coord, kontejnery)
