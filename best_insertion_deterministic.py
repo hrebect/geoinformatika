@@ -22,37 +22,43 @@ def BestInsertion(V,C):
         V_copy.remove(start[i])
         # Add starting points to Hamiltonian path
         Q.append(start[i])
-    
     # Until there is non-visited node:
-    while 'N' in S:
-        # Get random non-visited node
-        u = random.choice(V_copy)
+    while 'N' in S: 
         # Initialize minimal extention of W
-        minW = inf
-        # Calculate distance between v1 u v2
-        for j in range(len(Q)):
-            v1 = Q[j]
-            if j+1 < len(Q):
-                v2 = Q[j+1]
-            else:
-                v2 = Q[0]
-            # Distance (v1 u v2) - (v1 v2)
-            new_dist = (sqrt((C[u][0]-C[v1][0])**2 + (C[u][1]-C[v1][1])**2) + sqrt((C[u][0]-C[v2][0])**2 + (C[u][1]-C[v2][1])**2) - sqrt((C[v1][0]-C[v2][0])**2 + (C[v1][1]-C[v2][1])**2))
-            # If between v1 u v2 is minimum, set it as minW ans mark place, where can be possibly added node to Hamiltonian path
-            if new_dist < minW:
-                minW = new_dist
-                new_node = j+1
+        minW_all = inf
+        # Search through all non-visited nodes
+        for u in V_copy:
+            # initialize minimal extention with this node
+            minW = inf
+            # Calculate distance between v1 u v2
+            for j in range(len(Q)):
+                v1 = Q[j]
+                if j+1 < len(Q):
+                    v2 = Q[j+1]
+                else:
+                    v2 = Q[0]
+                # Distance (v1 u v2) - (v1 v2)
+                new_dist = (sqrt((C[u][0]-C[v1][0])**2 + (C[u][1]-C[v1][1])**2) + sqrt((C[u][0]-C[v2][0])**2 + (C[u][1]-C[v2][1])**2) - sqrt((C[v1][0]-C[v2][0])**2 + (C[v1][1]-C[v2][1])**2))
+                # If between v1 u v2 is minimum, set it as minW and mark place, where can be possibly added node to Hamiltonian path and which node can be possibly added
+                if new_dist < minW:
+                    minW = new_dist
+                    position = j+1
+            # If actual node u is best set u as minimum_node, save its best position and distance
+            if minW < minW_all:
+                minW_all = minW
+                min_node = u
+                position_best = position
         # Set node u as open
-        S[u] = 'O'
+        S[min_node] = 'O'
         # Insert node to Hamiltonian path
-        Q.insert(new_node, u)
+        Q.insert(position_best, min_node)
         # Remove added node form queue
-        V_copy.remove(u)
+        V_copy.remove(min_node)
         # Add minimum distance between v1 u v2 to W of Hamiltonian path
-        W = W + minW
+        W = W + minW_all
     # Close Hamiltonian path
     Q.append(Q[0])
-    return Q, W
+    return Q, W, start
 
 def plot(Q,C):
     # Function to show Hamiltonian path
@@ -76,6 +82,6 @@ with open('data//coord_cernosice.csv','r') as f:
         V.append(int(row[0]))
         C[int(row[0])] = [float(row[1]),float(row[2])]
 
-Q, W = BestInsertion(V,C)
-print(W, Q)
+Q, W, start = BestInsertion(V,C)
+print(W, Q , start)
 plot(Q, C)
